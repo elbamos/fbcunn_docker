@@ -1,39 +1,11 @@
-Here's how I get this party started:
-```
-sudo docker build -t kmatzen/fbcunn .
-sudo docker run -t -i --net=host --privileged -v /mnt/drive/kmatzen/ilsvrc12:/ilsvrc12 -v /lib/modules:/lib/modules -v /tmp/torch_cache:/torch_cache kmatzen/fbcunn
-```
+A docker build file for `fbcunn` and `tensorflow`, based on the `fbcunn` Dockerfile by @kmatzen and the `tensorflow` Dockerfile included with Tensorflow.
 
-I assume the CUDA driver is installed on your machine.
+This is intended to solve the problem that both `fbcunn` and `tensorflow` are very sensitive in terms of what versions of Ubuntu, CUDA, and various dependencies they will accept.
 
-* You need ```--privileged``` for the container to access your nvidia devices.  You can grant a finer-grained permission using lxc.
-* You probably want to access your data inside the container.  That's what ```-v /mnt/drive/kmatzen/ilsvrc12:/ilsvrc12``` is for.
-* You might need to mount the hosts' /lib/modules.  That's the point of ```-v /lib/modules:/lib/modules```.
-* Unless you want your work to be blown away with the container, stick the torch cache somewhere on the host filesystem with ```-v /tmp/torch_cache:/torch_cache```.
+This docker image will enable torch with `fbcunn`, and `tensorflow`, with `keras`, to work with an Nvidia GPU. 
 
-This isn't the best configuration, but it gets things going quickly.
+A slew of other likely-to-be-needed torch and python packages are installed at the same time.  
 
-Please take a look at the actual Dockerfile.  Some steps from the fbcunn installation instructions didn't work quite right, so I hacked around them.
+This works on a system with Ubuntu 15.10, CUDA 7.5 and CUDN 6.5v2.
 
-Want a quick way to figure out if everything is configured correctly for your GPU?  Start the container, run ```th``` and execute the following code:
-```
-require 'cutorch'
-torch.setdefaulttensortype('torch.CudaTensor')
-print(  cutorch.getDeviceProperties(cutorch.getDevice()) )
-```
-Did it print your device?  Good.  Did it print something like:
-```
-th> require 'cutorch'
-/torch-distro/install/share/lua/5.1/trepl/init.lua:319: loop or previous error loading module 'cutorch'
-stack traceback:
-  [C]: in function 'error'
-  /torch-distro/install/share/lua/5.1/trepl/init.lua:319: in function 'require'
-  [string "require 'cutorch'"]:1: in main chunk
-  [C]: in function 'xpcall'
-  /torch-distro/install/share/lua/5.1/trepl/init.lua:588: in function 'repl'
-  /torch-distro/install/lib/luarocks/rocks/trepl/scm-1/bin/th:185: in main chunk
-  [C]: at 0x00406170
-                                                                      [0.0002s]
-```
-Then check to make sure you provided ```--privileged```.
-Do you actually need to mount ```/lib/modules```?  Don't know.  cutorch seems fine without it.  Other CUDA software I've used in Docker needs it.
+It is assumed that the user will modify the launch script to add their data directory to the docker installation. 
