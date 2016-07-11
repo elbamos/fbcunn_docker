@@ -1,0 +1,37 @@
+FROM amoselb/fbcunn
+
+RUN cd ~ && \
+    mkdir -p src && \
+    cd src && \
+    curl -L https://github.com/Itseez/opencv/archive/2.4.11.zip -o ocv.zip && \
+    unzip ocv.zip && \
+    cd opencv-2.4.11 && \
+    mkdir release && \
+    cd release && \
+    cmake -D CMAKE_BUILD_TYPE=Release \
+          -D CMAKE_INSTALL_PREFIX=/usr/local \
+          -D BUILD_PYTHON_SUPPORT=ON \
+	  -D CUDA_GENERATION=Kepler \
+          .. && \
+    make -j8 && \
+    make install
+
+RUN cd ~ && \
+    mkdir -p src && \
+    cd src && \
+    curl -L \
+         https://github.com/davisking/dlib/releases/download/v18.16/dlib-18.16.tar.bz2 \
+         -o dlib.tar.bz2 && \
+    tar xf dlib.tar.bz2 && \
+    cd dlib-18.16/python_examples && \
+    mkdir build && \
+    cd build && \
+    cmake ../../tools/python && \
+    cmake --build . --config Release && \
+    cp dlib.so /usr/local/lib/python2.7/dist-packages
+
+RUN cd 
+RUN git clone https://github.com/cmusatyalab/openface.git && \
+	cd openface && \
+	pip install -r demos/web/requirements.txt && \
+	python setup.py install 

@@ -4,8 +4,9 @@ MAINTAINER Amos Elberg <amos.elberg@gmail.com>
 #ENV PATH /torch-distro/install/bin:/usr/local/cuda/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 #ENV LD_LIBRARY_PATH /torch-distro/install/lib:/usr/local/cuda/lib64/
 
-ENV CUDA_HOME /usr/local/cuda
-ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:/usr/local/cudnn-7.0-v4:/usr/local/lib:/usr/lib
+#ENV CUDA_HOME /usr/local/cuda
+#ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:
+ENV LD_LIBRARY_PATH /usr/local/cudnn-7.0-v4:/usr/local/lib:/usr/lib
 #ENV PATH /usr/local/cuda-7.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin
 
 RUN apt-get update && \
@@ -128,6 +129,12 @@ RUN git clone https://github.com/torch/nn && \
 
 RUN luarocks install nn
 RUN luarocks install cunn
+
+RUN cd /tmp && \
+	git clone -b R4 https://github.com/soumith/cudnn.torch && \
+	cd /tmp/cudnn.torch && \
+	luarocks make ./cudnn-scm-1.rockspec
+    
 # This wasn't in the fbcunn instructions, but when I tried to run the imagenet
 # example, it complained it couldn't find fbnn.
 RUN cd /tmp/fbnn && \
@@ -137,38 +144,6 @@ RUN cd /tmp/fbnn && \
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
-
-# More torch packages
-RUN luarocks install https://raw.github.com/clementfarabet/gfx.js/master/gfx.js-scm-0.rockspec
-RUN luarocks install moses
-#RUN luarocks install nnop
-RUN luarocks install dp
-RUN luarocks install csvigo
-RUN luarocks install loadcaffe
-RUN luarocks install hdf5
-RUN luarocks install matio
-RUN luarocks install LuaXML
-RUN luarocks install MIDI
-RUN luarocks install audio
-RUN luarocks install ffmpeg
-RUN luarocks install torchx
-RUN luarocks install npy4th
-RUN luarocks install nngraph
-RUN luarocks install rnn
-RUN luarocks install nninit
-RUN luarocks install unsup
-RUN luarocks install manifold
-RUN luarocks install display
-RUN luarocks install fex
-RUN luarocks install imgraph
-RUN luarocks install videograph
-RUN luarocks install SocialLua
-RUN luarocks install eex
-RUN luarocks install gm
-RUN luarocks install graphicsmagick
-RUN luarocks install autograd
-RUN luarocks install inn
-RUN luarocks install rational
 
 # Senna 
 RUN cd /tmp && \
